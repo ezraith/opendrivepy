@@ -11,31 +11,39 @@ class RoadGeometry(object):
         self.y = y
         self.hdg = hdg
         self.length = length
-        self.xCoordinates = list()
-        self.yCoordinates = list()
+        self.xarr = list()
+        self.yarr = list()
+
+    def get_xyarr(self):
+        return self.xarr, self.yarr
 
 
 class RoadLine(RoadGeometry):
     def __init__(self, s, x, y, hdg, length):
         super(RoadLine, self).__init__(s, x, y, hdg, length)
+        self.generate_coords()
 
     def graph(self):
-        x = nprange(self.length)
-        plt.plot(self.x + (x * cos(self.hdg)), self.y + (x * sin(self.hdg)), 'b-')
+        plt.plot(self.xarr, self.yarr, 'b-')
+
+    def generate_coords(self):
+        array = nprange(self.length)
+        self.xarr = np.array([self.x + (x * cos(self.hdg)) for x in array])
+        self.yarr = np.array([self.y + (y * sin(self.hdg)) for y in array])
 
 
 class RoadArc(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, curvature):
         super(RoadArc, self).__init__(s, x, y, hdg, length)
         self.curvature = curvature
+        self.generate_coords()
 
     def graph(self):
-        r, x, y, array = self.generate_coords()
-        xarr = np.array([r * cos(x) for x in array])
-        yarr = np.array([r * sin(y) for y in array])
-        plt.plot(x + xarr, y + yarr, 'b-')
+        print(self.xarr)
+        print(self.yarr)
+        plt.plot(self.xarr, self.yarr, 'b-')
 
-    def generate_coords(self):
+    def base_arc(self):
         radius = fabs(1/self.curvature)
         circumference = radius * pi * 2
         angle = (self.length/circumference) * 2 * pi
@@ -55,6 +63,10 @@ class RoadArc(RoadGeometry):
             array = list(range(61))
             return radius, circlex, circley, [start_angle - (angle * x / 60) for x in array]
 
+    def generate_coords(self):
+        r, x, y, array = self.base_arc()
+        self.xarr = np.array([x + (r * cos(i)) for i in array])
+        self.yarr = np.array([y + (r * sin(i)) for i in array])
 
 class RoadSpiral(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, curvstart, curvend):
@@ -63,15 +75,10 @@ class RoadSpiral(RoadGeometry):
         self.curvEnd = curvend
         self.cDot = (curvend-curvstart)/length
         self.spiralS = curvstart/self.cDot
+        self.generate_coords(10)
 
     def graph(self):
-        xarr = []
-        yarr = []
-        arr = nprange(self.length)
-        xarr, yarr = self.evaluate_spiral(10)
-        print(xarr)
-        print(yarr)
-        plt.plot(xarr, yarr, '-b')
+        plt.plot(self.xarr, self.yarr, '-b')
 
     def odr_spiral(self, s):
         a = 1 / sqrt(fabs(self.cDot))
@@ -116,102 +123,8 @@ class RoadSpiral(RoadGeometry):
 
         return xarr, yarr
 
-    # def evaluate_spiral(self, n):
-    #     if self.curvStart == 0:
-    #         r_end = fabs(1/self.curvEnd)
-    #         a = 1/sqrt(2 * self.length * r_end)
-    #         dys, dxs = fresnel(n*a)
-    #         dx = dxs/a
-    #         dy = dys/a*-1
-    #         dxr = dx * cos(self.hdg) - dy * sin(self.hdg)
-    #         dyr = dx * sin(self.hdg) + dy * cos(self.hdg)
-    #         return self.x + dxr, self.y + dyr
-    #
-    # def evaluate_spiral2(self,n):
-    #     if (fabs(self.curvEnd) > 1.00e-15) and (fabs(self.curvStart)<=1.00e-15):
-    #         normal = True
-    #         curv = self.curvEnd
-    #         a = 1/sqrt(2*(1/fabs(curv)*self.length))
-    #         denormalize = 1/a
-    #         mRotCos = cos(self.hdg)
-    #         mRotSin = sin(self.hdg)
-    #     else:
-    #         normal = False
-    #         curv = self.curvStart
-    #         a = 1 / sqrt(2 * (1 / fabs(curv) * self.length))
-    #         denormalize = 1/a
-    #         L = (self.length*a)/sqrt(pi/2)
-    #         endY, endX = fresnel(L)
-    #         if curv < 0:
-    #             endY*=-endY
-    #         endX*=(1/a)/sqrt(pi/2)
-    #         endY*=(1/a)/sqrt(pi/2)
-    #         differenceAngle = L*L*sqrt(pi/2)*sqrt(pi/2)
-    #         if curv < 0:
-    #             diffAngle = self.hdg - differenceAngle-pi
-    #         else:
-    #             diffAngle = self.hdg + differenceAngle-pi
-    #         mRotCos = cos(diffAngle)
-    #         mRotSin = sin(diffAngle)
-    #
-    #     if normal:
-    #         l = (n - self.s)*a/sqrt(pi/2)
-    #     else:
-    #         l = (self.s - n)*a/sqrt(pi/2)
-    #     tmpY, tmpX = fresnel(l)
-    #
-    #     if curv < 0:
-    #         tmpY *= -tmpY
-    #
-    #     tmpX *= denormalize * sqrt(pi/2)
-    #     tmpY *= denormalize * sqrt(pi/2)
-    #
-    #     l = (n-self.s)*a
-    #     tangentangle = l*l
-    #     if curv < 0:
-    #         tangentangle = -tangentangle
-    #     rHdg = self.hdg+tangentangle
-    #
-    #     if not normal:
-    #         tmpX-=endX
-    #         tmpY-=endX
-    #         tmpY = -tmpY
-    #
-    #     rX = self.x + tmpX * mRotCos - tmpY * mRotSin
-    #     rY = self.y + tmpY * mRotCos + tmpX * mRotSin
-    #
-    #     return rX, rY
-    #
-    # def evaluate_spiral3(self, n):
-    #     xarr, yarr = self.base_spiral((self.curvEnd - self.curvStart)/ self.length, n)
-    #     sinRot = sin(self.hdg)
-    #     cosRot = cos(self.hdg)
-    #     for i in range(n):
-    #         xarr[i] = self.x + cosRot*xarr[i] + sinRot*yarr[i]
-    #         yarr[i] = self.y + cosRot*yarr[i] - sinRot*xarr[i]
-    #
-    #     return xarr, yarr
-    #
-    # def odr_spiral(self, s, cdot):
-    #     a = sqrt(pi/abs(cdot))
-    #     y, x = fresnel(s/a)
-    #     return x*a, y*a * (x > 0 - x < 0), s * s * cdot/2
-    #
-    # def base_spiral(self, cDot, n):
-    #     ox, oy, theta = self.odr_spiral(self.curvStart/cDot, cDot)
-    #     sinRot = sin(theta)
-    #     cosRot = cos(theta)
-    #     xcoords = list()
-    #     ycoords = list()
-    #     for i in range(n):
-    #         tx, ty, ttheta = self.odr_spiral((i * self.length/n) + self.curvStart/cDot, cDot)
-    #
-    #         dx = tx - ox
-    #         dy = ty - oy
-    #         xcoords.append(dx)
-    #         ycoords.append(dy)
-    #
-    #     return xcoords, ycoords
+    def generate_coords(self, n):
+        self.xarr, self.yarr = self.evaluate_spiral(n)
 
 class RoadParamPoly3(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, aU, bU, cU, dU, aV, bV, cV, dV):
