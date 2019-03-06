@@ -61,88 +61,157 @@ class RoadSpiral(RoadGeometry):
         super(RoadSpiral, self).__init__(s, x, y, hdg, length)
         self.curvStart = curvstart
         self.curvEnd = curvend
+        self.cDot = (curvend-curvstart)/length
+        self.spiralS = curvstart/self.cDot
 
     def graph(self):
         xarr = []
         yarr = []
         arr = nprange(self.length)
-        print(arr)
-        for n in arr:
-            x, y = self.evaluate_spiral2(n)
-            xarr.append(x)
-            yarr.append(y)
+        xarr, yarr = self.evaluate_spiral(10)
         print(xarr)
         print(yarr)
         plt.plot(xarr, yarr, '-b')
 
+    def odr_spiral(self, s):
+        a = 1 / sqrt(fabs(self.cDot))
+        a *= sqrt(pi)
+
+        y, x = fresnel(s / a)
+
+        x *= a
+        y *= a
+
+        if self.cDot < 0:
+            y *= -1
+
+        t = s * s * self.cDot * 0.5
+        return x, y, t
+
+    def base_spiral(self, n):
+        ox, oy, theta = self.odr_spiral(self.spiralS)
+        sinRot = sin(theta)
+        cosRot = cos(theta)
+        xcoords = list()
+        ycoords = list()
+        for i in range(n):
+            tx, ty, ttheta = self.odr_spiral((i * self.length / n) + self.spiralS)
+
+            dx = tx - ox
+            dy = ty - oy
+            xcoords.append(dx * cosRot + dy * sinRot)
+            ycoords.append(dy * cosRot - dx * sinRot)
+
+        return xcoords, ycoords
+
     def evaluate_spiral(self, n):
-        if self.curvStart == 0:
-            r_end = fabs(1/self.curvEnd)
-            a = 1/sqrt(2 * self.length * r_end)
-            dys, dxs = fresnel(n*a)
-            dx = dxs/a
-            dy = dys/a*-1
-            dxr = dx * cos(self.hdg) - dy * sin(self.hdg)
-            dyr = dx * sin(self.hdg) + dy * cos(self.hdg)
-            return self.x + dxr, self.y + dyr
+        xarr, yarr = self.base_spiral(n)
+        sinRot = sin(self.hdg)
+        cosRot = cos(self.hdg)
+        for i in range(n):
+            tmpX = self.x + cosRot * xarr[i] - sinRot * yarr[i]
+            tmpY = self.y + cosRot * yarr[i] + sinRot * xarr[i]
+            xarr[i] = tmpX
+            yarr[i] = tmpY
 
-    def evaluate_spiral2(self,n):
-        if (fabs(self.curvEnd) > 1.00e-15) and (fabs(self.curvStart)<=1.00e-15):
-            normal = True
-            curv = self.curvEnd
-            a = 1/sqrt(2*(1/fabs(curv)*self.length))
-            denormalize = 1/a
-            mRotCos = cos(self.hdg)
-            mRotSin = sin(self.hdg)
-        else:
-            normal = False
-            curv = self.curvStart
-            a = 1 / sqrt(2 * (1 / fabs(curv) * self.length))
-            denormalize = 1/a
-            L = (self.length*a)/sqrt(pi/2)
-            endY, endX = fresnel(L)
-            if curv < 0:
-                endY*=-endY
-            endX*=(1/a)/sqrt(pi/2)
-            endY*=(1/a)/sqrt(pi/2)
-            differenceAngle = L*L*sqrt(pi/2)*sqrt(pi/2)
-            if curv < 0:
-                diffAngle = self.hdg - differenceAngle-pi
-            else:
-                diffAngle = self.hdg + differenceAngle-pi
-            mRotCos = cos(diffAngle)
-            mRotSin = sin(diffAngle)
+        return xarr, yarr
 
-        if normal:
-            l = (n - self.s)*a/sqrt(pi/2)
-        else:
-            l = (self.s - n)*a/sqrt(pi/2)
-        tmpY, tmpX = fresnel(l)
-
-        if curv < 0:
-            tmpY *= -tmpY
-
-        tmpX *= denormalize * sqrt(pi/2)
-        tmpY *= denormalize * sqrt(pi/2)
-
-        l = (n-self.s)*a
-        tangentangle = l*l
-        if curv < 0:
-            tangentangle = -tangentangle
-        rHdg = self.hdg+tangentangle
-
-        if not normal:
-            tmpX-=endX
-            tmpY-=endX
-            tmpY = -tmpY
-
-        rX = self.x + tmpX * mRotCos - tmpY * mRotSin
-        rY = self.y + tmpY * mRotCos + tmpX * mRotSin
-
-        return rX, rY
-
-    def evaluate_spiral3(self):
-
+    # def evaluate_spiral(self, n):
+    #     if self.curvStart == 0:
+    #         r_end = fabs(1/self.curvEnd)
+    #         a = 1/sqrt(2 * self.length * r_end)
+    #         dys, dxs = fresnel(n*a)
+    #         dx = dxs/a
+    #         dy = dys/a*-1
+    #         dxr = dx * cos(self.hdg) - dy * sin(self.hdg)
+    #         dyr = dx * sin(self.hdg) + dy * cos(self.hdg)
+    #         return self.x + dxr, self.y + dyr
+    #
+    # def evaluate_spiral2(self,n):
+    #     if (fabs(self.curvEnd) > 1.00e-15) and (fabs(self.curvStart)<=1.00e-15):
+    #         normal = True
+    #         curv = self.curvEnd
+    #         a = 1/sqrt(2*(1/fabs(curv)*self.length))
+    #         denormalize = 1/a
+    #         mRotCos = cos(self.hdg)
+    #         mRotSin = sin(self.hdg)
+    #     else:
+    #         normal = False
+    #         curv = self.curvStart
+    #         a = 1 / sqrt(2 * (1 / fabs(curv) * self.length))
+    #         denormalize = 1/a
+    #         L = (self.length*a)/sqrt(pi/2)
+    #         endY, endX = fresnel(L)
+    #         if curv < 0:
+    #             endY*=-endY
+    #         endX*=(1/a)/sqrt(pi/2)
+    #         endY*=(1/a)/sqrt(pi/2)
+    #         differenceAngle = L*L*sqrt(pi/2)*sqrt(pi/2)
+    #         if curv < 0:
+    #             diffAngle = self.hdg - differenceAngle-pi
+    #         else:
+    #             diffAngle = self.hdg + differenceAngle-pi
+    #         mRotCos = cos(diffAngle)
+    #         mRotSin = sin(diffAngle)
+    #
+    #     if normal:
+    #         l = (n - self.s)*a/sqrt(pi/2)
+    #     else:
+    #         l = (self.s - n)*a/sqrt(pi/2)
+    #     tmpY, tmpX = fresnel(l)
+    #
+    #     if curv < 0:
+    #         tmpY *= -tmpY
+    #
+    #     tmpX *= denormalize * sqrt(pi/2)
+    #     tmpY *= denormalize * sqrt(pi/2)
+    #
+    #     l = (n-self.s)*a
+    #     tangentangle = l*l
+    #     if curv < 0:
+    #         tangentangle = -tangentangle
+    #     rHdg = self.hdg+tangentangle
+    #
+    #     if not normal:
+    #         tmpX-=endX
+    #         tmpY-=endX
+    #         tmpY = -tmpY
+    #
+    #     rX = self.x + tmpX * mRotCos - tmpY * mRotSin
+    #     rY = self.y + tmpY * mRotCos + tmpX * mRotSin
+    #
+    #     return rX, rY
+    #
+    # def evaluate_spiral3(self, n):
+    #     xarr, yarr = self.base_spiral((self.curvEnd - self.curvStart)/ self.length, n)
+    #     sinRot = sin(self.hdg)
+    #     cosRot = cos(self.hdg)
+    #     for i in range(n):
+    #         xarr[i] = self.x + cosRot*xarr[i] + sinRot*yarr[i]
+    #         yarr[i] = self.y + cosRot*yarr[i] - sinRot*xarr[i]
+    #
+    #     return xarr, yarr
+    #
+    # def odr_spiral(self, s, cdot):
+    #     a = sqrt(pi/abs(cdot))
+    #     y, x = fresnel(s/a)
+    #     return x*a, y*a * (x > 0 - x < 0), s * s * cdot/2
+    #
+    # def base_spiral(self, cDot, n):
+    #     ox, oy, theta = self.odr_spiral(self.curvStart/cDot, cDot)
+    #     sinRot = sin(theta)
+    #     cosRot = cos(theta)
+    #     xcoords = list()
+    #     ycoords = list()
+    #     for i in range(n):
+    #         tx, ty, ttheta = self.odr_spiral((i * self.length/n) + self.curvStart/cDot, cDot)
+    #
+    #         dx = tx - ox
+    #         dy = ty - oy
+    #         xcoords.append(dx)
+    #         ycoords.append(dy)
+    #
+    #     return xcoords, ycoords
 
 class RoadParamPoly3(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, aU, bU, cU, dU, aV, bV, cV, dV):
