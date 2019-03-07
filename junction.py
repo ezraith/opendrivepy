@@ -8,6 +8,7 @@ class Junction(object):
         self.priorities = list()
         self.controllers = list()
 
+
 class Connection(object):
     def __init__(self, id, incoming_road, connecting_road, contact_point):
         self.id = id

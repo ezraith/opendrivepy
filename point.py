@@ -7,9 +7,9 @@ class Point(object):
 
 
 class EndPoint(Point):
-    def __init__(self, x, y, id, is_start):
+    def __init__(self, x, y, id, contact_point):
         super(EndPoint, self).__init__(x, y)
         self.id = id
-        self.is_start = is_start
+        self.contact_point = contact_point
 
 
