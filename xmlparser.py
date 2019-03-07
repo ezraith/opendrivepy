@@ -1,4 +1,5 @@
 from lxml import etree
+from opendrive import OpenDrive
 from road import Road
 from roadgeometry import RoadGeometry, RoadLine, RoadSpiral, RoadArc
 from junction import Junction, Connection
@@ -22,6 +23,7 @@ class XMLParser(object):
             # Create the Road object
             new_road = Road(road.get('name'), road.get('length'), road.get('id'), road.get('junction'))
 
+            # Finds the element with the geometry records and loops through them
             plan_view = road.find('planView')
             for geometry in plan_view.iter('geometry'):
                 record = geometry[0].tag
