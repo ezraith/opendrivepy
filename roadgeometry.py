@@ -17,6 +17,12 @@ class RoadGeometry(object):
     def get_xyarr(self):
         return self.xarr, self.yarr
 
+    def get_start_point(self):
+        return self.x, self.y
+
+    def get_end_point(self):
+        return self.xarr[-1], self.yarr[-1]
+
     def graph(self):
         pass
 
@@ -68,6 +74,7 @@ class RoadArc(RoadGeometry):
         r, x, y, array = self.base_arc()
         self.xarr = np.array([x + (r * cos(i)) for i in array])
         self.yarr = np.array([y + (r * sin(i)) for i in array])
+
 
 class RoadSpiral(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, curvstart, curvend):

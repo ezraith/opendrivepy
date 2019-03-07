@@ -1,4 +1,4 @@
-
+from point import EndPoint
 
 class Road(object):
     def __init__(self, name, length, id, junction):
@@ -14,11 +14,17 @@ class Road(object):
         self.lateral_profile = None
         self.lanes = None
 
+        # x, y coordinates that represent the road
+        # Mainly used for graphics
         self.road_xarr = list()
         self.road_yarr = list()
 
+        self.startPoint = None
+        self.endPoint = None
+
     def add_record(self, record):
         self.plan_view.append(record)
+        self.update_endpoints()
 
     def set_predecessor(self, predecessor):
         self.predecessor = predecessor
@@ -33,6 +39,16 @@ class Road(object):
             xarr, yarr = record.get_xyarr()
             self.road_xarr.extend(xarr)
             self.road_yarr.extend(yarr)
+
+    # Updates the values of self.startPoint and self.endPoint based on the road array
+    def update_endpoints(self):
+        if self.plan_view is not None:
+            x, y = self.plan_view[0].get_start_point()
+            id = self.plan_view[0].get_id()
+            self.startPoint = EndPoint(x, y, self.id, True)
+
+            x, y = self.plan_view[-1].get_end_point()
+            self.endPoint = EndPoint(x, y, self.id, False)
 
 
 class RoadLink(object):
