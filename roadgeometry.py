@@ -39,9 +39,7 @@ class RoadArc(RoadGeometry):
         self.generate_coords()
 
     def graph(self):
-        print(self.xarr)
-        print(self.yarr)
-        plt.plot(self.xarr, self.yarr, 'b-')
+        plt.plot(self.xarr, self.yarr, 'r-')
 
     def base_arc(self):
         radius = fabs(1/self.curvature)
@@ -77,7 +75,7 @@ class RoadSpiral(RoadGeometry):
         self.generate_coords(10)
 
     def graph(self):
-        plt.plot(self.xarr, self.yarr, '-b')
+        plt.plot(self.xarr, self.yarr, 'g-')
 
     def odr_spiral(self, s):
         a = 1 / sqrt(fabs(self.cDot))
