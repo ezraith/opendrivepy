@@ -20,6 +20,8 @@ class Road(object):
     def add_record(self, record):
         self.plan_view.append(record)
 
+
+
     def draw_road(self):
         for record in self.plan_view:
             record.graph()

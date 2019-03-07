@@ -17,6 +17,9 @@ class RoadGeometry(object):
     def get_xyarr(self):
         return self.xarr, self.yarr
 
+    def graph(self):
+        pass
+
 
 class RoadLine(RoadGeometry):
     def __init__(self, s, x, y, hdg, length):

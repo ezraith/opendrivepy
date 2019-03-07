@@ -3,7 +3,7 @@ from opendrive import OpenDrive
 from road import Road
 from roadgeometry import RoadGeometry, RoadLine, RoadSpiral, RoadArc
 from junction import Junction, Connection
-from matplotlib import pyplot as plt
+
 
 class XMLParser(object):
     def __init__(self, file):
@@ -11,7 +11,6 @@ class XMLParser(object):
         self.root = self.xml.getroot()
         self.opendrive = OpenDrive()
         self.header = self.root.find('header')
-
 
     # Parses all roads in the xodr and instantiates them into objects
     # Returns a list of Road objects
