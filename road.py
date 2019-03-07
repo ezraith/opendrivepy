@@ -1,5 +1,6 @@
 from point import EndPoint
 
+
 class Road(object):
     def __init__(self, name, length, id, junction):
         self.name = name
@@ -32,6 +33,9 @@ class Road(object):
     def set_successor(self, successor):
         self.successor = successor
 
+    def get_id(self):
+        return self.id
+
     def draw_road(self):
         for record in self.plan_view:
             record.graph()
@@ -44,7 +48,6 @@ class Road(object):
     def update_endpoints(self):
         if self.plan_view is not None:
             x, y = self.plan_view[0].get_start_point()
-            id = self.plan_view[0].get_id()
             self.startPoint = EndPoint(x, y, self.id, True)
 
             x, y = self.plan_view[-1].get_end_point()

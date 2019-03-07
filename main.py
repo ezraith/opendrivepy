@@ -38,6 +38,6 @@ from lxml import etree
 # Crossing8Course.xodr
 parser = XMLParser('Crossing8Course.xodr')
 roads = parser.parse_roads()
-for road in roads:
+for road in roads.values():
     road.draw_road()
 plt.show()

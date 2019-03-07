@@ -15,7 +15,7 @@ class XMLParser(object):
     # Parses all roads in the xodr and instantiates them into objects
     # Returns a list of Road objects
     def parse_roads(self):
-        ret = list()
+        ret = dict()
 
         for road in self.root.iter('road'):
 
@@ -61,13 +61,14 @@ class XMLParser(object):
                     curv_end = float(geometry[0].get('curvEnd'))
                     new_road.add_record(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
-            ret.append(new_road)
+            ret[new_road.get_id()] = new_road
+
 
         return ret
 
     # TODO Add Priorities, JunctionGroups and LaneLinks
     def parse_junctions(self):
-        ret = list()
+        ret = dict()
 
         for junction in self.root.iter('junction'):
             new_junction = Junction(junction.get('name'), junction.get('id'))
@@ -81,6 +82,6 @@ class XMLParser(object):
 
                 new_junction.add_connection(new_connection)
 
-            ret.append(new_junction)
+            ret[new_junction.get_id()] = new_junction
 
         return ret

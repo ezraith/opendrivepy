@@ -3,9 +3,9 @@
 class OpenDrive(object):
     def __init__(self):
         self.header = None
-        self.roads = list()
+        self.roads = dict()
         self.controllers = list()
-        self.junctions = list()
+        self.junctions = dict()
         self.junction_groups = list()
         self.stations = list()
 
