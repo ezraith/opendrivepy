@@ -6,7 +6,8 @@ class Road(object):
         self.length = length
         self.id = id
         self.junction = junction
-        self.link = None
+        self.predecessor = None
+        self.successor = None
         self.type = list()
         self.plan_view = list()
         self.elevation_profile = None
@@ -28,3 +29,8 @@ class Road(object):
             self.road_yarr.extend(yarr)
 
 
+class RoadLink(object):
+    def __init__(self, element_type, element_id, contact_point = None):
+        self.element_type = element_type
+        self.element_id = element_id
+        self.contact_point = contact_point

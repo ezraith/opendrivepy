@@ -57,10 +57,10 @@ class XMLParser(object):
 
             for connection in junction.iter('connection'):
                 id = connection.get('id')
-                incomingRoad = connection.get('incomingRoad')
-                connectingRoad = connection.get('connectingRoad')
-                contactPoint = connection.get('contactPoint')
-                new_connection = Connection(id, incomingRoad, connectingRoad, contactPoint)
+                incoming_road = connection.get('incomingRoad')
+                connecting_road = connection.get('connectingRoad')
+                contact_point = connection.get('contactPoint')
+                new_connection = Connection(id, incoming_road, connecting_road, contact_point)
 
                 new_junction.add_connection(new_connection)
 
