@@ -14,15 +14,6 @@ class RoadGeometry(object):
         self.xarr = list()
         self.yarr = list()
 
-    def get_xyarr(self):
-        return self.xarr, self.yarr
-
-    def get_start_point(self):
-        return self.x, self.y
-
-    def get_end_point(self):
-        return self.xarr[-1], self.yarr[-1]
-
     def graph(self):
         pass
 

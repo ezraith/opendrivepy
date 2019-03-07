@@ -23,34 +23,24 @@ class Road(object):
         self.startPoint = None
         self.endPoint = None
 
-    def add_record(self, record):
-        self.plan_view.append(record)
-        self.update_endpoints()
-
-    def set_predecessor(self, predecessor):
-        self.predecessor = predecessor
-
-    def set_successor(self, successor):
-        self.successor = successor
-
-    def get_id(self):
-        return self.id
-
     def draw_road(self):
         for record in self.plan_view:
             record.graph()
 
-            xarr, yarr = record.get_xyarr()
+            xarr = record.xarr
+            yarr = record.yarr
             self.road_xarr.extend(xarr)
             self.road_yarr.extend(yarr)
 
     # Updates the values of self.startPoint and self.endPoint based on the road array
     def update_endpoints(self):
         if self.plan_view is not None:
-            x, y = self.plan_view[0].get_start_point()
+            x = self.plan_view[0].x
+            y = self.plan_view[0].y
             self.startPoint = EndPoint(x, y, self.id, True)
 
-            x, y = self.plan_view[-1].get_end_point()
+            x = self.plan_view[-1].xarr[-1]
+            y = self.plan_view[-1].yarr[-1]
             self.endPoint = EndPoint(x, y, self.id, False)
 
 

@@ -10,7 +10,7 @@ class XMLParser(object):
         self.xml = etree.parse(file)
         self.root = self.xml.getroot()
         self.opendrive = OpenDrive()
-        self.header = self.root.find('header')
+        self.opendrive.header = self.root.find('header')
 
     # Parses all roads in the xodr and instantiates them into objects
     # Returns a list of Road objects
@@ -31,14 +31,14 @@ class XMLParser(object):
                     element_type = predecessor.get('elementType')
                     element_id = predecessor.get('elementId')
                     contact_point = predecessor.get('contactPoint')
-                    new_road.set_predecessor(RoadLink(element_type, element_id, contact_point))
+                    new_road.predecessor = (RoadLink(element_type, element_id, contact_point))
 
                 successor = link.find('successor')
                 if successor is not None:
                     element_type = predecessor.get('elementType')
                     element_id = predecessor.get('elementId')
                     contact_point = predecessor.get('contactPoint')
-                    new_road.set_successor(RoadLink(element_type, element_id, contact_point))
+                    new_road.successor = (RoadLink(element_type, element_id, contact_point))
 
             # Parses planView for geometry records
             plan_view = road.find('planView')
@@ -52,17 +52,16 @@ class XMLParser(object):
                 length = float(geometry.get('length'))
 
                 if record == 'line':
-                    new_road.add_record(RoadLine(s, x, y, hdg, length))
+                    new_road.plan_view.append(RoadLine(s, x, y, hdg, length))
                 elif record == 'arc':
                     curvature = float(geometry[0].get('curvature'))
-                    new_road.add_record(RoadArc(s, x, y, hdg, length, curvature))
+                    new_road.plan_view.append(RoadArc(s, x, y, hdg, length, curvature))
                 elif record == 'spiral':
                     curv_start = float(geometry[0].get('curvStart'))
                     curv_end = float(geometry[0].get('curvEnd'))
-                    new_road.add_record(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
+                    new_road.plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
-            ret[new_road.get_id()] = new_road
-
+            ret[new_road.id] = new_road
 
         return ret
 
@@ -80,8 +79,8 @@ class XMLParser(object):
                 contact_point = connection.get('contactPoint')
                 new_connection = Connection(id, incoming_road, connecting_road, contact_point)
 
-                new_junction.add_connection(new_connection)
+                new_junction.connections.append(new_connection)
 
-            ret[new_junction.get_id()] = new_junction
+            ret[new_junction.id] = new_junction
 
         return ret
