@@ -16,7 +16,7 @@ class Road(object):
         self.road_xarr = list()
         self.road_yarr = list()
 
-    def add_plan(self, record):
+    def add_record(self, record):
         self.plan_view.append(record)
 
     def draw_road(self):

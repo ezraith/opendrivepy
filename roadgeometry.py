@@ -45,7 +45,7 @@ class RoadArc(RoadGeometry):
         radius = fabs(1/self.curvature)
         circumference = radius * pi * 2
         angle = (self.length/circumference) * 2 * pi
-        # if clockwise, then curvature < 0
+        # If curvature < 0, then the arc rotates clockwise
         if self.curvature > 0:
             start_angle = self.hdg - (pi / 2)
             circlex = self.x - (cos(start_angle) * radius)
@@ -53,6 +53,7 @@ class RoadArc(RoadGeometry):
 
             array = list(range(61))
             return radius, circlex, circley, [start_angle + (angle * x / 60) for x in array]
+        # Otherwise it is anticlockwise
         else:
             start_angle = self.hdg + (pi / 2)
             circlex = self.x - (cos(start_angle) * radius)
@@ -77,6 +78,7 @@ class RoadSpiral(RoadGeometry):
     def graph(self):
         plt.plot(self.xarr, self.yarr, 'g-')
 
+    # Approximates the standard Euler spiral at a point length s along the curve
     def odr_spiral(self, s):
         a = 1 / sqrt(fabs(self.cDot))
         a *= sqrt(pi)
@@ -92,10 +94,12 @@ class RoadSpiral(RoadGeometry):
         t = s * s * self.cDot * 0.5
         return x, y, t
 
+    # Approximates a piece of the standard Euler spiral using n points
+    # The spiral is adjusted such that it stars along x=0
     def base_spiral(self, n):
         ox, oy, theta = self.odr_spiral(self.spiralS)
-        sinRot = sin(theta)
-        cosRot = cos(theta)
+        sin_rot = sin(theta)
+        cos_rot = cos(theta)
         xcoords = list()
         ycoords = list()
         for i in range(n):
@@ -103,8 +107,8 @@ class RoadSpiral(RoadGeometry):
 
             dx = tx - ox
             dy = ty - oy
-            xcoords.append(dx * cosRot + dy * sinRot)
-            ycoords.append(dy * cosRot - dx * sinRot)
+            xcoords.append(dx * cos_rot + dy * sin_rot)
+            ycoords.append(dy * cos_rot - dx * sin_rot)
 
         return xcoords, ycoords
 
@@ -122,6 +126,7 @@ class RoadSpiral(RoadGeometry):
 
     def generate_coords(self, n):
         self.xarr, self.yarr = self.evaluate_spiral(n)
+
 
 class RoadParamPoly3(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, aU, bU, cU, dU, aV, bV, cV, dV):
