@@ -1,6 +1,6 @@
 from lxml import etree
 from opendrive import OpenDrive
-from road import Road
+from road import Road, RoadLink
 from roadgeometry import RoadGeometry, RoadLine, RoadSpiral, RoadArc
 from junction import Junction, Connection
 
@@ -22,7 +22,25 @@ class XMLParser(object):
             # Create the Road object
             new_road = Road(road.get('name'), road.get('length'), road.get('id'), road.get('junction'))
 
-            # Finds the element with the geometry records and loops through them
+            # Parses link for predecessor and successors
+            # No support for neighbor is implemented
+            link = road.find('link')
+            if link is not None:
+                predecessor = link.find('predecessor')
+                if predecessor is not None:
+                    element_type = predecessor.get('elementType')
+                    element_id = predecessor.get('elementId')
+                    contact_point = predecessor.get('contactPoint')
+                    new_road.set_predecessor(RoadLink(element_type, element_id, contact_point))
+
+                successor = link.find('successor')
+                if successor is not None:
+                    element_type = predecessor.get('elementType')
+                    element_id = predecessor.get('elementId')
+                    contact_point = predecessor.get('contactPoint')
+                    new_road.set_successor(RoadLink(element_type, element_id, contact_point))
+
+            # Parses planView for geometry records
             plan_view = road.find('planView')
             for geometry in plan_view.iter('geometry'):
                 record = geometry[0].tag

@@ -20,7 +20,11 @@ class Road(object):
     def add_record(self, record):
         self.plan_view.append(record)
 
+    def set_predecessor(self, predecessor):
+        self.predecessor = predecessor
 
+    def set_successor(self, successor):
+        self.successor = successor
 
     def draw_road(self):
         for record in self.plan_view:
@@ -32,7 +36,7 @@ class Road(object):
 
 
 class RoadLink(object):
-    def __init__(self, element_type, element_id, contact_point = None):
+    def __init__(self, element_type, element_id, contact_point):
         self.element_type = element_type
         self.element_id = element_id
         self.contact_point = contact_point
