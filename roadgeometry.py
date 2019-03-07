@@ -49,10 +49,9 @@ class RoadArc(RoadGeometry):
         angle = (self.length/circumference) * 2 * pi
         # if clockwise, then curvature < 0
         if self.curvature > 0:
-            # TODO Test the anticlockwise case for drawArc
             start_angle = self.hdg - (pi / 2)
-            circlex = self.x + (cos(start_angle) * radius)
-            circley = self.y + (sin(start_angle) * radius)
+            circlex = self.x - (cos(start_angle) * radius)
+            circley = self.y - (sin(start_angle) * radius)
 
             array = list(range(61))
             return radius, circlex, circley, [start_angle + (angle * x / 60) for x in array]
