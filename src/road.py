@@ -1,4 +1,4 @@
-from point import EndPoint
+from src.point import EndPoint
 
 
 class Road(object):

@@ -1,4 +1,4 @@
-from roadmap import RoadMap
+from src.roadmap import RoadMap
 
 class OpenDrive(object):
     def __init__(self):

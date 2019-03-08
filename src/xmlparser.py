@@ -1,8 +1,8 @@
 from lxml import etree
-from opendrive import OpenDrive
-from road import Road, RoadLink
-from roadgeometry import RoadGeometry, RoadLine, RoadSpiral, RoadArc
-from junction import Junction, Connection
+from src.opendrive import OpenDrive
+from src.road import Road, RoadLink
+from src.roadgeometry import RoadLine, RoadSpiral, RoadArc
+from src.junction import Junction, Connection
 
 
 class XMLParser(object):

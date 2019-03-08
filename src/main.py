@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-from xmlparser import XMLParser
-from opendrive import OpenDrive
+from src.xmlparser import XMLParser
+from src.opendrive import OpenDrive
 
 # road1 = RoadLine(0, 7.0710678120487289e+00, 7.0710678117015151e+00, 3.9269908169686372e+00, 4.8660000002387466e-01)
 # road5 = RoadLine(1.6031224248136859e+01, -6.7269902520731444e+00, 6.7269896521996131e+00, 2.3561944901771223e+00, 4.8660000002378739e-01)
