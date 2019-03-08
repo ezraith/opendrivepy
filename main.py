@@ -1,8 +1,6 @@
-from roadgeometry import RoadLine, RoadArc, RoadSpiral
 import matplotlib.pyplot as plt
 from xmlparser import XMLParser
 from opendrive import OpenDrive
-from lxml import etree
 
 # road1 = RoadLine(0, 7.0710678120487289e+00, 7.0710678117015151e+00, 3.9269908169686372e+00, 4.8660000002387466e-01)
 # road5 = RoadLine(1.6031224248136859e+01, -6.7269902520731444e+00, 6.7269896521996131e+00, 2.3561944901771223e+00, 4.8660000002378739e-01)
@@ -36,12 +34,13 @@ from lxml import etree
 # plt.ylim(0, 20)
 # plt.show()
 
-# Crossing8Course.xodr
-parser = XMLParser('Crossing8Course.xodr')
+# Crossing8Course.xod
+
+parser = XMLParser('examples/Crossing8Course.xodr')
 roads = parser.parse_roads()
 for road in roads.values():
     road.update_endpoints()
-#     road.draw_road()
+    road.draw_road()
 # plt.show()
 junctions = parser.parse_junctions()
 
@@ -49,5 +48,14 @@ opendrive = OpenDrive()
 opendrive.roads = roads
 opendrive.junctions = junctions
 
-print(opendrive.is_connected(roads['500'].startPoint, roads['500'].endPoint))
+opendrive.generate_roadmap()
+roadmap = opendrive.roadmap
+roadmap.get_endpoints()
 
+print(roadmap.is_connected(roads['514'].end_point, roads['514'].end_point))
+hull = opendrive.roadmap.shrink_convex_hull()
+for point in hull:
+    print(point.x, point.y, point.id, point.contact_point)
+    plt.plot(point.x, point.y, 'r+')
+
+plt.show()
