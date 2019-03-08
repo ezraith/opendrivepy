@@ -20,8 +20,8 @@ class Road(object):
         self.road_xarr = list()
         self.road_yarr = list()
 
-        self.startPoint = EndPoint
-        self.endPoint = EndPoint
+        self.start_point = EndPoint
+        self.end_point = EndPoint
 
     def draw_road(self):
         for record in self.plan_view:
@@ -37,11 +37,11 @@ class Road(object):
         if self.plan_view is not None:
             x = self.plan_view[0].x
             y = self.plan_view[0].y
-            self.startPoint = EndPoint(x, y, self.id, 'start')
+            self.start_point = EndPoint(x, y, self.id, 'start')
 
             x = self.plan_view[-1].xarr[-1]
             y = self.plan_view[-1].yarr[-1]
-            self.endPoint = EndPoint(x, y, self.id, 'end')
+            self.end_point = EndPoint(x, y, self.id, 'end')
 
 
 class RoadLink(object):
