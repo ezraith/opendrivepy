@@ -35,9 +35,9 @@ class XMLParser(object):
 
                 successor = link.find('successor')
                 if successor is not None:
-                    element_type = predecessor.get('elementType')
-                    element_id = predecessor.get('elementId')
-                    contact_point = predecessor.get('contactPoint')
+                    element_type = successor.get('elementType')
+                    element_id = successor.get('elementId')
+                    contact_point = successor.get('contactPoint')
                     new_road.successor = (RoadLink(element_type, element_id, contact_point))
 
             # Parses planView for geometry records
