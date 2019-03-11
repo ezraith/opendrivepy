@@ -7,11 +7,13 @@ class RoadMap(object):
 
         self.endpoints = list()
 
+    # Pulls the endpoints from each road and adds it to self.endpoints
     def get_endpoints(self):
         for road in self.roads.values():
             self.endpoints.append(road.start_point)
             self.endpoints.append(road.end_point)
 
+    # Determines the EndPoint with the smallest x-coordinate
     def left_most_endpoint(self):
         if self.endpoints is not None:
             leftmost = self.endpoints[0]
@@ -22,11 +24,13 @@ class RoadMap(object):
         return None
 
     # Given a base point, returns the closest point to b with the ccw most heading
+    #TODO Consider rewriting this using RoadLinks and Junctions instead of looping through all points
     def ccw_most_endpoint(self, base):
         current = None
 
         for point in self.endpoints:
 
+            # Sets the first endpoint with a connection to base as current
             if current is None:
                 if self.is_connected(base, point):
                     current = point
@@ -40,6 +44,7 @@ class RoadMap(object):
 
         return current
 
+    # Determines if two EndPoints are connected either externally or internally
     def is_connected(self, p1, p2):
         # Check if the two endpoints belong to the same road
         if p1.id is not p2.id and p1.contact_point is not p2.contact_point:
@@ -73,6 +78,7 @@ class RoadMap(object):
 
         return False
 
+    # Determines if p1 is connected to p2 in junction id
     def is_junction_connected(self, p1, p2, id):
         connections = self.junctions[id].connections
         for connection in connections:
@@ -98,11 +104,13 @@ class RoadMap(object):
             # If the new point is equal to the base point, its is not the next point on the hull
             if bn2 == 0:
                 return 1
+            # If the new point is closer to base than the current point
             elif bn2 < bc2:
                 return -1
             else:
                 return 1
 
+        # If n is anticlockwise compared to heading formed by b and c
         elif ret < 0:
             return -1
         else:
