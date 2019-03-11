@@ -4,16 +4,19 @@ class RoadMap(object):
     def __init__(self, roads, junctions):
         self.roads = roads
         self.junctions = junctions
+        # TODO Collect all endpoints that end in a junction
 
         self.endpoints = list()
 
     # Pulls the endpoints from each road and adds it to self.endpoints
+    # TODO pull only the endpoints that are part of non junction roads
     def get_endpoints(self):
         for road in self.roads.values():
             self.endpoints.append(road.start_point)
             self.endpoints.append(road.end_point)
 
     # Determines the EndPoint with the smallest x-coordinate
+    # TODO Find the leftmost endpoint not in an intersection
     def left_most_endpoint(self):
         if self.endpoints is not None:
             leftmost = self.endpoints[0]
@@ -24,7 +27,8 @@ class RoadMap(object):
         return None
 
     # Given a base point, returns the closest point to b with the ccw most heading
-    #TODO Consider rewriting this using RoadLinks and Junctions instead of looping through all points
+    # TODO If junction, look either at the endpoint or heading
+    # TODO Consider rewriting this using RoadLinks and Junctions instead of looping through all points
     def ccw_most_endpoint(self, base):
         current = None
 
@@ -34,17 +38,19 @@ class RoadMap(object):
             if current is None:
                 if self.is_connected(base, point):
                     current = point
-            elif self.ccw_heading(base, current, point) is -1:
-                print("Base: ", base.x, base.y, base.id, base.contact_point)
-                print("Point: ", point.x, point.y, point.id, point.contact_point)
-                print("CCW: ", self.ccw_heading(base, current, point))
-                print("Current: ", current.x, current.y, current.id, current.contact_point)
-                current = point
+            elif self.is_connected(base, point):
+                if self.ccw_heading(base, current, point) is -1:
+                    print("Base: ", base.x, base.y, base.id, base.contact_point)
+                    print("Point: ", point.x, point.y, point.id, point.contact_point)
+                    print("CCW: ", self.ccw_heading(base, current, point))
+                    print("Current: ", current.x, current.y, current.id, current.contact_point)
+                    current = point
         print("Current: ", current.x, current.y, current.id, current.contact_point)
 
         return current
 
     # Determines if two EndPoints are connected either externally or internally
+    # TODO No need to check if points are connected if we only search through connected points
     def is_connected(self, p1, p2):
         # Check if the two endpoints belong to the same road
         if p1.id is not p2.id and p1.contact_point is not p2.contact_point:
@@ -95,7 +101,7 @@ class RoadMap(object):
     # Returns -1 if the new point is anticlockwise or collinear but closer to c
     def ccw_heading(self, b, c, n):
         ret = (n.y - b.y) * (c.x - n.x) - (n.x - b.x) * (c.y - n.y)
-        print("Ret: ", ret)
+        # print("Ret: ", ret)
         # If the three points are collinear
         if ret == 0:
             bc2 = (b.x - c.x) ** 2 + (b.y - c.y) ** 2
