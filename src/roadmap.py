@@ -94,7 +94,7 @@ class RoadMap(object):
 
         for point in connected_ep:
             if current is None:
-                if point is not base:
+                if point != base:
                     current = point
             elif self.ccw_heading(base, current, point) is -1:
                 current = point

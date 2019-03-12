@@ -9,7 +9,7 @@ class XMLParser(object):
     def __init__(self, file):
         self.xml = etree.parse(file)
         self.root = self.xml.getroot()
-        self.opendrive = OpenDrive()
+        self.opendrive = OpenDrive
         self.opendrive.header = self.root.find('header')
 
     # Parses all roads in the xodr and instantiates them into objects
