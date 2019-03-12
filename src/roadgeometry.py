@@ -1,47 +1,47 @@
 import numpy as np
 from scipy.special import fresnel
 from matplotlib import pyplot as plt
-from math import pi, sin, cos, sqrt, fabs, floor
+from math import pi, sin, cos, sqrt, fabs, floor, ceil
+
+from src.point import Point
 
 
 class RoadGeometry(object):
-    def __init__(self, s, x, y, hdg, length):
+    def __init__(self, s, x, y, hdg, length, style):
         self.s = s
         self.x = x
         self.y = y
         self.hdg = hdg
         self.length = length
-        self.xarr = list()
-        self.yarr = list()
+
+        self.style = style
+        self.points = list()
 
     def graph(self):
-        pass
+        plt.plot([pt.x for pt in self.points], [pt.y for pt in self.points], self.style)
 
 
 class RoadLine(RoadGeometry):
     def __init__(self, s, x, y, hdg, length):
-        super(RoadLine, self).__init__(s, x, y, hdg, length)
+        super(RoadLine, self).__init__(s, x, y, hdg, length, style='b-')
         self.generate_coords()
 
-    def graph(self):
-        plt.plot(self.xarr, self.yarr, 'b-')
-
     def generate_coords(self):
-        array = nprange(self.length)
-        self.xarr = np.array([self.x + (x * cos(self.hdg)) for x in array])
-        self.yarr = np.array([self.y + (y * sin(self.hdg)) for y in array])
-
+        num = ceil(self.length) + 1
+        segment = self.length/num
+        for n in range(num):
+            n = n * segment
+            x = self.x + (n * cos(self.hdg))
+            y = self.y + (n * sin(self.hdg))
+            self.points.append(Point(x, y))
 
 class RoadArc(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, curvature):
-        super(RoadArc, self).__init__(s, x, y, hdg, length)
+        super(RoadArc, self).__init__(s, x, y, hdg, length, 'r-')
         self.curvature = curvature
-        self.generate_coords()
+        self.generate_coords(ceil(self.length) + 1)
 
-    def graph(self):
-        plt.plot(self.xarr, self.yarr, 'r-')
-
-    def base_arc(self):
+    def base_arc(self, n):
         radius = fabs(1/self.curvature)
         circumference = radius * pi * 2
         angle = (self.length/circumference) * 2 * pi
@@ -51,33 +51,33 @@ class RoadArc(RoadGeometry):
             circlex = self.x - (cos(start_angle) * radius)
             circley = self.y - (sin(start_angle) * radius)
 
-            array = list(range(61))
-            return radius, circlex, circley, [start_angle + (angle * x / 60) for x in array]
+            array = list(range(n))
+            return radius, circlex, circley, [start_angle + (angle * x / (n-1)) for x in array]
         # Otherwise it is anticlockwise
         else:
             start_angle = self.hdg + (pi / 2)
             circlex = self.x - (cos(start_angle) * radius)
             circley = self.y - (sin(start_angle) * radius)
-            array = list(range(61))
-            return radius, circlex, circley, [start_angle - (angle * x / 60) for x in array]
+            array = list(range(n))
+            return radius, circlex, circley, [start_angle - (angle * x / (n-1)) for x in array]
 
-    def generate_coords(self):
-        r, x, y, array = self.base_arc()
-        self.xarr = np.array([x + (r * cos(i)) for i in array])
-        self.yarr = np.array([y + (r * sin(i)) for i in array])
+    def generate_coords(self, n):
+        r, circle_x, circle_y, array = self.base_arc(n)
+
+        for n in array:
+            x = circle_x + (r * cos(n))
+            y = circle_y + (r * sin(n))
+            self.points.append(Point(x, y))
 
 
 class RoadSpiral(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, curvstart, curvend):
-        super(RoadSpiral, self).__init__(s, x, y, hdg, length)
+        super(RoadSpiral, self).__init__(s, x, y, hdg, length, 'g-')
         self.curvStart = curvstart
         self.curvEnd = curvend
         self.cDot = (curvend-curvstart)/length
         self.spiralS = curvstart/self.cDot
-        self.generate_coords(10)
-
-    def graph(self):
-        plt.plot(self.xarr, self.yarr, 'g-')
+        self.generate_coords(ceil(self.length) + 1)
 
     # Approximates the standard Euler spiral at a point length s along the curve
     def odr_spiral(self, s):
@@ -126,7 +126,9 @@ class RoadSpiral(RoadGeometry):
         return xarr, yarr
 
     def generate_coords(self, n):
-        self.xarr, self.yarr = self.evaluate_spiral(n)
+        xarr, yarr = self.evaluate_spiral(n)
+        for x, y in zip(xarr, yarr):
+            self.points.append(Point(x, y))
 
 
 class RoadParamPoly3(RoadGeometry):
