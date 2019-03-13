@@ -1,5 +1,4 @@
 from lxml import etree
-from src.opendrive import OpenDrive
 from src.road import Road, RoadLink
 from src.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from src.junction import Junction, Connection
@@ -9,8 +8,7 @@ class XMLParser(object):
     def __init__(self, file):
         self.xml = etree.parse(file)
         self.root = self.xml.getroot()
-        self.opendrive = OpenDrive
-        self.opendrive.header = self.root.find('header')
+        #self.opendrive.header = self.root.find('header')
 
     # Parses all roads in the xodr and instantiates them into objects
     # Returns a list of Road objects

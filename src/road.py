@@ -19,6 +19,8 @@ class Road(object):
         # Endpoints between records are duplicated atm
         self.points = list()
         self.generate_points()
+        self.segments = list()
+        self.generate_segments()
 
         self.start_point = EndPoint
         self.end_point = EndPoint
@@ -27,6 +29,10 @@ class Road(object):
     def generate_points(self):
         for record in self.plan_view:
             self.points.extend(record.points)
+
+    def generate_segments(self):
+        for record in self.plan_view:
+            self.segments.extend(record.segments)
 
     def draw_road(self):
         for record in self.plan_view:
@@ -42,6 +48,14 @@ class Road(object):
             x = self.points[-1].x
             y = self.points[-1].y
             self.end_point = EndPoint(x, y, self.id, 'end')
+
+    # Determines if b
+    def in_range(self, other):
+        sp = self.start_point.distance(other)
+        if self.start_point.distance(other) <= self.length:
+            return True
+
+        return False
 
 
 class RoadLink(object):

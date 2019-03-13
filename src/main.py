@@ -1,27 +1,17 @@
 import matplotlib.pyplot as plt
-from src.xmlparser import XMLParser
 from src.opendrive import OpenDrive
+from src.point import Point
 
-parser = XMLParser('examples/Crossing8Course.xodr')
-roads = parser.parse_roads()
-for road in roads.values():
-    road.update_endpoints()
-    # road.draw_road()
+opendrive = OpenDrive('examples/Crossing8Course.xodr')
+for road in opendrive.roads.values():
+    road.draw_road()
         # plt.xlim(-210, 210)
         # plt.ylim(-90, 90)
-# plt.show()
-junctions = parser.parse_junctions()
 
-opendrive = OpenDrive()
-opendrive.roads = roads
-opendrive.junctions = junctions
-
-opendrive.generate_roadmap()
-roadmap = opendrive.roadmap
-
-hull = opendrive.roadmap.shrink_convex_hull()
-for point in hull:
-    print(point.x, point.y, point.id, point.contact_point)
-    plt.plot(point.x, point.y, 'r+')
+q = Point(-100, 0)
+point, dist, segment = opendrive.roadmap.closest_point(q)
+plt.plot(q.x, q.y, 'g+')
+plt.plot(point.x, point.y, 'r+')
+plt.gca().set_aspect('equal', adjustable='box')
 
 plt.show()

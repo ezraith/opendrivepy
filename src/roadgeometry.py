@@ -16,30 +16,35 @@ class RoadGeometry(object):
 
         self.style = style
         self.points = list()
+        self.segments = list()
 
     def graph(self):
         plt.plot([pt.x for pt in self.points], [pt.y for pt in self.points], self.style)
+
+    def generate_segments(self):
+        for i in range(len(self.points)-1):
+            self.segments.append(RoadSegment(self.points[i], self.points[i+1]))
 
 
 class RoadLine(RoadGeometry):
     def __init__(self, s, x, y, hdg, length):
         super(RoadLine, self).__init__(s, x, y, hdg, length, style='b-')
         self.generate_coords()
+        self.generate_segments()
 
     def generate_coords(self):
-        num = ceil(self.length) + 1
-        segment = self.length/num
-        for n in range(num):
-            n = n * segment
+        for n in (0, self.length):
             x = self.x + (n * cos(self.hdg))
             y = self.y + (n * sin(self.hdg))
             self.points.append(Point(x, y))
+
 
 class RoadArc(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, curvature):
         super(RoadArc, self).__init__(s, x, y, hdg, length, 'r-')
         self.curvature = curvature
         self.generate_coords(ceil(self.length) + 1)
+        self.generate_segments()
 
     def base_arc(self, n):
         radius = fabs(1/self.curvature)
@@ -78,6 +83,7 @@ class RoadSpiral(RoadGeometry):
         self.cDot = (curvend-curvstart)/length
         self.spiralS = curvstart/self.cDot
         self.generate_coords(ceil(self.length) + 1)
+        self.generate_segments()
 
     # Approximates the standard Euler spiral at a point length s along the curve
     def odr_spiral(self, s):
@@ -133,7 +139,7 @@ class RoadSpiral(RoadGeometry):
 
 class RoadParamPoly3(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, aU, bU, cU, dU, aV, bV, cV, dV):
-        super(RoadParamPoly3, self).__init__(s, x, y, hdg, length)
+        super(RoadParamPoly3, self).__init__(s, x, y, hdg, length, 'y-')
         self.aU = aU
         self.bU = bU
         self.cU = cU
@@ -147,12 +153,32 @@ class RoadParamPoly3(RoadGeometry):
         x = np.array(range(0, self.length))
 
 
-def nprange(end):
-    if end < 11:
-        array = list(range(11))
-        array = [end*x/10 for x in array]
-    else:
-        array = list(range(floor(end)))
-        if floor(end) != end:
-            array.append(end)
-    return np.array(array)
+class RoadSegment(object):
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+        self.l2 = (self.p1.x - self.p2.x)**2 + (self.p1.y - self.p2.y)**2
+
+    def min_distance(self, q):
+        if self.l2 == 0:
+            return self.p1.distance(q)
+
+        t = ((q.x - self.p1.x) * (self.p2.x - self.p1.x) + (q.y - self.p1.y) * (self.p2.y - self.p1.y)) /self.l2
+        t = max(0, min(1, t))
+
+        x = self.p1.x + t * (self.p2.x - self.p1.x)
+        y = self.p1.y + t * (self.p2.y - self.p1.y)
+        projection = Point(x, y)
+        return q.distance(projection)
+
+    def min_point(self, q):
+        if self.l2 == 0:
+            return self.p1.distance(q)
+
+        t = ((q.x - self.p1.x) * (self.p2.x - self.p1.x) + (q.y - self.p1.y) * (self.p2.y - self.p1.y)) / self.l2
+        t = max(0, min(1, t))
+
+        x = self.p1.x + t * (self.p2.x - self.p1.x)
+        y = self.p1.y + t * (self.p2.y - self.p1.y)
+        projection = Point(x, y)
+        return projection
