@@ -2,24 +2,27 @@ from src.point import EndPoint
 
 
 class Road(object):
-    def __init__(self, name, length, id, junction):
+    def __init__(self, name, length, id, junction, predecessor, successor, plan_view):
         self.name = name
         self.length = length
         self.id = id
         self.junction = junction
-        self.predecessor = RoadLink
-        self.successor = RoadLink
+        self.predecessor = predecessor
+        self.successor = successor
         self.type = list()
-        self.plan_view = list()
+        self.plan_view = plan_view
         self.elevation_profile = None
         self.lateral_profile = None
         self.lanes = None
 
         # Points that represent the road
+        # Endpoints between records are duplicated atm
         self.points = list()
+        self.generate_points()
 
         self.start_point = EndPoint
         self.end_point = EndPoint
+        self.update_endpoints()
 
     def generate_points(self):
         for record in self.plan_view:
@@ -31,9 +34,6 @@ class Road(object):
 
     # Updates the values of self.startPoint and self.endPoint based on the road array
     def update_endpoints(self):
-        if len(self.points) == 0:
-            self.generate_points()
-
         if self.plan_view is not None:
             x = self.points[0].x
             y = self.points[0].y

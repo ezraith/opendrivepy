@@ -20,29 +20,35 @@ class XMLParser(object):
         for road in self.root.iter('road'):
 
             # Create the Road object
-            new_road = Road(road.get('name'), road.get('length'), road.get('id'), road.get('junction'))
+            name = road.get('name')
+            length = road.get('length')
+            id = road.get('id')
+            junction = road.get('junction')
 
             # Parses link for predecessor and successors
             # No support for neighbor is implemented
             link = road.find('link')
+            predecessor = None
+            successor = None
             if link is not None:
-                predecessor = link.find('predecessor')
-                if predecessor is not None:
-                    element_type = predecessor.get('elementType')
-                    element_id = predecessor.get('elementId')
-                    contact_point = predecessor.get('contactPoint')
-                    new_road.predecessor = (RoadLink(element_type, element_id, contact_point))
+                xpredecessor = link.find('predecessor')
+                if xpredecessor is not None:
+                    element_type = xpredecessor.get('elementType')
+                    element_id = xpredecessor.get('elementId')
+                    contact_point = xpredecessor.get('contactPoint')
+                    predecessor = (RoadLink(element_type, element_id, contact_point))
 
-                successor = link.find('successor')
+                xsuccessor = link.find('successor')
                 if successor is not None:
-                    element_type = successor.get('elementType')
-                    element_id = successor.get('elementId')
-                    contact_point = successor.get('contactPoint')
-                    new_road.successor = (RoadLink(element_type, element_id, contact_point))
+                    element_type = xsuccessor.get('elementType')
+                    element_id = xsuccessor.get('elementId')
+                    contact_point = xsuccessor.get('contactPoint')
+                    successor = (RoadLink(element_type, element_id, contact_point))
 
             # Parses planView for geometry records
-            plan_view = road.find('planView')
-            for geometry in plan_view.iter('geometry'):
+            xplan_view = road.find('planView')
+            plan_view = list()
+            for geometry in xplan_view.iter('geometry'):
                 record = geometry[0].tag
 
                 s = float(geometry.get('s'))
@@ -52,15 +58,16 @@ class XMLParser(object):
                 length = float(geometry.get('length'))
 
                 if record == 'line':
-                    new_road.plan_view.append(RoadLine(s, x, y, hdg, length))
+                    plan_view.append(RoadLine(s, x, y, hdg, length))
                 elif record == 'arc':
                     curvature = float(geometry[0].get('curvature'))
-                    new_road.plan_view.append(RoadArc(s, x, y, hdg, length, curvature))
+                    plan_view.append(RoadArc(s, x, y, hdg, length, curvature))
                 elif record == 'spiral':
                     curv_start = float(geometry[0].get('curvStart'))
                     curv_end = float(geometry[0].get('curvEnd'))
-                    new_road.plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
+                    plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
+            new_road = Road(name, length, id, junction, predecessor, successor, plan_view)
             ret[new_road.id] = new_road
 
         return ret
