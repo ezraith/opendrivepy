@@ -2,6 +2,7 @@ from lxml import etree
 from src.road import Road, RoadLink
 from src.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from src.junction import Junction, Connection
+from src.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
 
 
 class XMLParser(object):
@@ -37,7 +38,7 @@ class XMLParser(object):
                     predecessor = (RoadLink(element_type, element_id, contact_point))
 
                 xsuccessor = link.find('successor')
-                if successor is not None:
+                if xsuccessor is not None:
                     element_type = xsuccessor.get('elementType')
                     element_id = xsuccessor.get('elementId')
                     contact_point = xsuccessor.get('contactPoint')
@@ -65,10 +66,58 @@ class XMLParser(object):
                     curv_end = float(geometry[0].get('curvEnd'))
                     plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
-            new_road = Road(name, length, id, junction, predecessor, successor, plan_view)
+            # Parse lanes for lane
+            xlanes = road.find('lanes')
+
+            xlane_section = xlanes.find('lanes')
+
+            center = list()
+            #xcenter = xlane_section.find('center')
+            # if xcenter is not None:
+            #     xlane = xcenter.find('lane')
+            #     lane = self.parse_lane(xlane)
+            #
+            # # lanes =
+
+            new_road = Road(name, length, id, junction, predecessor, successor, plan_view, lanes)
             ret[new_road.id] = new_road
 
         return ret
+
+    def parse_lane(self, xlane):
+
+        # Attributes
+        id = xlane.find('id')
+        type = xlane.find('type')
+        level = xlane.find('level')
+
+        # Lane Links
+        link = xlane.find('link')
+        predecessor = None
+        successor = None
+
+        if link is not None:
+            xpredecessor = link.find('predecessor')
+            if xpredecessor is not None:
+                link_id = xpredecessor.get('id')
+                predecessor = LaneLink(link_id)
+
+            xsuccessor = link.find('successor')
+            if xsuccessor is not None:
+                link_id = xsuccessor.get('id')
+                successor = LaneLink(link_id)
+
+        # Width
+
+
+        return Lane(id, type, level, predecessor, successor)
+
+
+
+
+
+        #lane_section = LaneSection(left, center, righg)
+        return Lanes(lane_section)
 
     # TODO Add Priorities, JunctionGroups and LaneLinks
     def parse_junctions(self):

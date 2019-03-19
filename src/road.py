@@ -2,7 +2,7 @@ from src.point import EndPoint
 
 
 class Road(object):
-    def __init__(self, name, length, id, junction, predecessor, successor, plan_view):
+    def __init__(self, name, length, id, junction, predecessor, successor, plan_view, lanes):
         self.name = name
         self.length = length
         self.id = id
@@ -13,7 +13,7 @@ class Road(object):
         self.plan_view = plan_view
         self.elevation_profile = None
         self.lateral_profile = None
-        self.lanes = None
+        self.lanes = lanes
 
         # Points that represent the road
         # Endpoints between records are duplicated atm

@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import fresnel
 from matplotlib import pyplot as plt
-from math import pi, sin, cos, sqrt, fabs, floor, ceil
+from math import pi, sin, cos, sqrt, fabs, ceil
 
 from src.point import Point
 
