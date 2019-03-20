@@ -1,16 +1,15 @@
 from lxml import etree
-from src.opendrive import OpenDrive
 from src.road import Road, RoadLink
 from src.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from src.junction import Junction, Connection
+from src.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
 
 
 class XMLParser(object):
     def __init__(self, file):
         self.xml = etree.parse(file)
         self.root = self.xml.getroot()
-        self.opendrive = OpenDrive
-        self.opendrive.header = self.root.find('header')
+        #self.opendrive.header = self.root.find('header')
 
     # Parses all roads in the xodr and instantiates them into objects
     # Returns a list of Road objects
@@ -20,29 +19,35 @@ class XMLParser(object):
         for road in self.root.iter('road'):
 
             # Create the Road object
-            new_road = Road(road.get('name'), road.get('length'), road.get('id'), road.get('junction'))
+            name = road.get('name')
+            length = road.get('length')
+            id = road.get('id')
+            junction = road.get('junction')
 
             # Parses link for predecessor and successors
             # No support for neighbor is implemented
             link = road.find('link')
+            predecessor = None
+            successor = None
             if link is not None:
-                predecessor = link.find('predecessor')
-                if predecessor is not None:
-                    element_type = predecessor.get('elementType')
-                    element_id = predecessor.get('elementId')
-                    contact_point = predecessor.get('contactPoint')
-                    new_road.predecessor = (RoadLink(element_type, element_id, contact_point))
+                xpredecessor = link.find('predecessor')
+                if xpredecessor is not None:
+                    element_type = xpredecessor.get('elementType')
+                    element_id = xpredecessor.get('elementId')
+                    contact_point = xpredecessor.get('contactPoint')
+                    predecessor = (RoadLink(element_type, element_id, contact_point))
 
-                successor = link.find('successor')
-                if successor is not None:
-                    element_type = successor.get('elementType')
-                    element_id = successor.get('elementId')
-                    contact_point = successor.get('contactPoint')
-                    new_road.successor = (RoadLink(element_type, element_id, contact_point))
+                xsuccessor = link.find('successor')
+                if xsuccessor is not None:
+                    element_type = xsuccessor.get('elementType')
+                    element_id = xsuccessor.get('elementId')
+                    contact_point = xsuccessor.get('contactPoint')
+                    successor = (RoadLink(element_type, element_id, contact_point))
 
             # Parses planView for geometry records
-            plan_view = road.find('planView')
-            for geometry in plan_view.iter('geometry'):
+            xplan_view = road.find('planView')
+            plan_view = list()
+            for geometry in xplan_view.iter('geometry'):
                 record = geometry[0].tag
 
                 s = float(geometry.get('s'))
@@ -52,18 +57,86 @@ class XMLParser(object):
                 length = float(geometry.get('length'))
 
                 if record == 'line':
-                    new_road.plan_view.append(RoadLine(s, x, y, hdg, length))
+                    plan_view.append(RoadLine(s, x, y, hdg, length))
                 elif record == 'arc':
                     curvature = float(geometry[0].get('curvature'))
-                    new_road.plan_view.append(RoadArc(s, x, y, hdg, length, curvature))
+                    plan_view.append(RoadArc(s, x, y, hdg, length, curvature))
                 elif record == 'spiral':
                     curv_start = float(geometry[0].get('curvStart'))
                     curv_end = float(geometry[0].get('curvEnd'))
-                    new_road.plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
+                    plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
+            # Parse lanes for lane
+            xlanes = road.find('lanes')
+
+            # Lane Sections
+            xlane_section = xlanes.find('laneSection')
+
+            # Center Lane
+            center = list()
+            xcenter = xlane_section.find('center')
+            if xcenter is not None:
+                xlane = xcenter.find('lane')
+                center.append(self.parse_lane(xlane))
+
+            # Left Lanes
+            left = list()
+            xleft = xlane_section.find('left')
+            if xleft is not None:
+                for xlane in xleft.iter('lane'):
+                    left.append(self.parse_lane(xlane))
+
+            # Right Lanes
+            right = list()
+            xright = xlane_section.find('right')
+            if xright is not None:
+                for xlane in xright.iter('lane'):
+                    right.append(self.parse_lane(xlane))
+
+            lane_section = LaneSection(left, center, right)
+
+            lanes = Lanes(lane_section)
+
+            new_road = Road(name, length, id, junction, predecessor, successor, plan_view, lanes)
             ret[new_road.id] = new_road
 
         return ret
+
+    def parse_lane(self, xlane):
+
+        # Attributes
+        id = int(xlane.get('id'))
+        type = xlane.get('type')
+        level = xlane.get('level')
+
+        # Lane Links
+        xlink = xlane.find('link')
+        predecessor = None
+        successor = None
+
+        if xlink is not None:
+            xpredecessor = xlink.find('predecessor')
+            if xpredecessor is not None:
+                link_id = int(xpredecessor.get('id'))
+                predecessor = LaneLink(link_id)
+
+            xsuccessor = xlink.find('successor')
+            if xsuccessor is not None:
+                link_id = int(xsuccessor.get('id'))
+                successor = LaneLink(link_id)
+
+        # Width
+        width = None
+        xwidth = xlane.find('width')
+        if xwidth is not None:
+            s_offset = float(xwidth.get('sOffset'))
+            a = float(xwidth.get('a'))
+            b = float(xwidth.get('b'))
+            c = float(xwidth.get('c'))
+            d = float(xwidth.get('d'))
+            width = LaneWidth(s_offset, a, b, c, d)
+
+        return Lane(id, type, level, predecessor, successor, width)
 
     # TODO Add Priorities, JunctionGroups and LaneLinks
     def parse_junctions(self):
