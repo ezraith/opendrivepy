@@ -57,6 +57,20 @@ class Road(object):
 
         return False
 
+    # WARNING: This only works so far with a fix width. Simplified for testing purposes
+    def get_left_width(self, n):
+        width = 0
+        for lane in self.lanes.lane_section.left:
+            width += lane.width.a
+
+        return width
+
+    def get_right_width(self, n):
+        width = 0
+        for lane in self.lanes.lane_section.right:
+            width += lane.width.a
+
+        return width
 
 class RoadLink(object):
     def __init__(self, element_type, element_id, contact_point):
