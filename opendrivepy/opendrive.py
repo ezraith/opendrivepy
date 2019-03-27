@@ -1,13 +1,13 @@
 from __future__ import division, print_function, absolute_import
 
 
-from src.roadmap import RoadMap
-import src.xmlparser
+from opendrivepy.roadmap import RoadMap
+import opendrivepy.xmlparser
 
 
 class OpenDrive(object):
     def __init__(self, file):
-        parser = src.xmlparser.XMLParser(file)
+        parser = opendrivepy.xmlparser.XMLParser(file)
         self.header = None
         self.roads = parser.parse_roads()
         self.controllers = list()

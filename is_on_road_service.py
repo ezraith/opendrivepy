@@ -5,8 +5,8 @@ from __future__ import division, absolute_import, print_function
 import rospy
 from srv import OnRoad
 import matplotlib.pyplot as plt
-from src.opendrive import OpenDrive
-from src.point import Point
+from opendrivepy.opendrive import OpenDrive
+from opendrivepy.point import Point
 
 
 def handle_is_on_road(req):

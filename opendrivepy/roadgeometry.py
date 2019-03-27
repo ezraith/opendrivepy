@@ -5,7 +5,7 @@ from scipy.special import fresnel
 from matplotlib import pyplot as plt
 from math import pi, sin, cos, sqrt, fabs, ceil
 
-from src.point import Point
+from opendrivepy.point import Point
 
 
 class RoadGeometry(object):

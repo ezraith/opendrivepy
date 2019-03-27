@@ -1,6 +1,6 @@
 from __future__ import division, print_function, absolute_import
 
-from src.point import EndPoint
+from opendrivepy.point import EndPoint
 
 
 class Road(object):

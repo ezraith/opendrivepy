@@ -2,10 +2,10 @@ from __future__ import division, print_function, absolute_import
 
 
 from lxml import etree
-from src.road import Road, RoadLink
-from src.roadgeometry import RoadLine, RoadSpiral, RoadArc
-from src.junction import Junction, Connection
-from src.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
+from opendrivepy.road import Road, RoadLink
+from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
+from opendrivepy.junction import Junction, Connection
+from opendrivepy.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
 
 
 class XMLParser(object):
