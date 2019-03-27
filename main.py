@@ -1,3 +1,5 @@
+from __future__ import division, absolute_import, print_function
+
 import matplotlib.pyplot as plt
 from src.opendrive import OpenDrive
 from src.point import Point
@@ -14,6 +16,8 @@ point = segment.min_point(q)
 distance = segment.min_distance(q)
 plt.plot(q.x, q.y, 'g+')
 plt.plot(point.x, point.y, 'r+')
+plt.ylim((15, -15))
+plt.xlim(198, 202)
 plt.gca().set_aspect('equal', adjustable='box')
 print(distance)
 plt.show()

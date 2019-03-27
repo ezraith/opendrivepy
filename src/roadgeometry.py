@@ -1,3 +1,5 @@
+from __future__ import division, print_function, absolute_import
+
 import numpy as np
 from scipy.special import fresnel
 from matplotlib import pyplot as plt
@@ -43,7 +45,7 @@ class RoadArc(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, curvature):
         super(RoadArc, self).__init__(s, x, y, hdg, length, 'r-')
         self.curvature = curvature
-        self.generate_coords(ceil(self.length) + 1)
+        self.generate_coords(int(ceil(self.length) + 1))
         self.generate_segments()
 
     def base_arc(self, n):
@@ -82,7 +84,7 @@ class RoadSpiral(RoadGeometry):
         self.curvEnd = curvend
         self.cDot = (curvend-curvstart)/length
         self.spiralS = curvstart/self.cDot
-        self.generate_coords(ceil(self.length) + 1)
+        self.generate_coords(int(ceil(self.length) + 1))
         self.generate_segments()
 
     # Approximates the standard Euler spiral at a point length s along the curve
