@@ -26,7 +26,7 @@ def handle_is_on_road(req):
 
 def is_on_road_server():
     rospy.init_node('is_on_road_server')
-    srv = rospy.Service('is_on_road', OnRoad)
+    srv = rospy.Service('is_on_road', OnRoad, handle_is_on_road)
     print('is_on_road service initialized')
     rospy.spin()
 
