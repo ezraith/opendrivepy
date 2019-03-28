@@ -112,7 +112,7 @@ class RoadSpiral(RoadGeometry):
         xcoords = list()
         ycoords = list()
         for i in range(n):
-            tx, ty, ttheta = self.odr_spiral((i * self.length / n) + self.spiralS)
+            tx, ty, ttheta = self.odr_spiral((i * self.length / (n-1)) + self.spiralS)
 
             dx = tx - ox
             dy = ty - oy
