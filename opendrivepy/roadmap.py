@@ -1,3 +1,4 @@
+from __future__ import division, print_function, absolute_import
 
 
 class RoadMap(object):
@@ -8,6 +9,8 @@ class RoadMap(object):
     def closest_point(self, q):
         min_dist = 100
         min_segment = None
+        road_left = 0
+        road_right = 0
 
         roads = self.roads
         for road in roads.values():
@@ -19,8 +22,11 @@ class RoadMap(object):
                 if segment.min_distance(q) < min_dist and self.in_range(segment, q, left, right, segment.min_distance(q)):
                     min_segment = segment
                     min_dist = segment.min_distance(q)
+                    road_left = left
+                    road_right = right
+                    print(road.id)
 
-        return min_segment
+        return min_segment, road_right, road_left
 
     # Returns the orientation of the point with respect to the line formed by s and e
     # 1 if the point is left of the line looking at e from s, -1 on the right and 0 on the line
@@ -36,4 +42,10 @@ class RoadMap(object):
             return dist <= left
         else:  # right
             return dist <= right
+
+    def is_on_road(self, q):
+        min_segment, right, left = self.closest_point(q)
+        if min_segment is not None:
+            return True
+        return False
 
