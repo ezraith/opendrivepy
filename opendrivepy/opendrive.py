@@ -10,7 +10,7 @@ class OpenDrive(object):
         parser = opendrivepy.xmlparser.XMLParser(file)
         self.header = None
         self.roads = parser.parse_roads()
-        self.controllers = list()
+        self.controllers = parser.parse_controllers()
         self.junctions = parser.parse_junctions()
         self.junction_groups = list()
         self.stations = list()

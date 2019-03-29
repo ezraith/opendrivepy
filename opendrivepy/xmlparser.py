@@ -6,6 +6,7 @@ from opendrivepy.road import Road, RoadLink
 from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from opendrivepy.junction import Junction, Connection
 from opendrivepy.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
+from opendrivepy.controller import Controller, Control
 
 
 class XMLParser(object):
@@ -140,6 +141,36 @@ class XMLParser(object):
 
         return Lane(id, type, level, predecessor, successor, width)
 
+    def parse_controllers(self):
+        ret = dict()
+
+        for xcontroller in self.root.getchildren():
+
+            # Filter all non controller elements of the root node
+            if xcontroller.tag != "controller":
+                continue
+
+            # Attributes
+            name = xcontroller.get('name')
+            id = xcontroller.get('id')
+            sequence = xcontroller.get('sequence')
+
+            # Control Element
+            controls = dict()
+            for xcontrol in xcontroller.iter('control'):
+                # Attributes
+                signal_id = xcontrol.get('signalId')
+                type = xcontrol.get('type')
+
+                new_control = Control(signal_id, type)
+                controls[new_control.signal_id] = new_control
+
+            new_controller = Controller(id, name, sequence, controls)
+
+            ret[new_controller.id] = new_controller
+
+        return ret
+
     # TODO Add Priorities, JunctionGroups and LaneLinks
     def parse_junctions(self):
         ret = dict()
@@ -159,3 +190,4 @@ class XMLParser(object):
             ret[new_junction.id] = new_junction
 
         return ret
+
