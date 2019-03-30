@@ -12,7 +12,7 @@ class OpenDrive(object):
         self.roads = parser.parse_roads()
         self.controllers = parser.parse_controllers()
         self.junctions = parser.parse_junctions()
-        self.junction_groups = list()
+        self.junction_groups = parser.parse_junction_group()
         self.stations = list()
 
         self.roadmap = RoadMap(self.roads)

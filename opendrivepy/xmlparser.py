@@ -7,6 +7,7 @@ from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from opendrivepy.junction import Junction, Connection
 from opendrivepy.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
 from opendrivepy.controller import Controller, Control
+from opendrivepy.junctiongroup import JunctionGroup, JunctionReference
 
 
 class XMLParser(object):
@@ -141,6 +142,26 @@ class XMLParser(object):
 
         return Lane(id, type, level, predecessor, successor, width)
 
+    # TODO Add Priorities, JunctionGroups and LaneLinks
+    def parse_junctions(self):
+        ret = dict()
+
+        for junction in self.root.iter('junction'):
+            new_junction = Junction(junction.get('name'), junction.get('id'))
+
+            for connection in junction.iter('connection'):
+                id = connection.get('id')
+                incoming_road = connection.get('incomingRoad')
+                connecting_road = connection.get('connectingRoad')
+                contact_point = connection.get('contactPoint')
+                new_connection = Connection(id, incoming_road, connecting_road, contact_point)
+
+                new_junction.connections.append(new_connection)
+
+            ret[new_junction.id] = new_junction
+
+        return ret
+
     def parse_controllers(self):
         ret = dict()
 
@@ -167,27 +188,32 @@ class XMLParser(object):
 
             new_controller = Controller(id, name, sequence, controls)
 
-            ret[new_controller.id] = new_controller
+            ret[id] = new_controller
 
         return ret
 
-    # TODO Add Priorities, JunctionGroups and LaneLinks
-    def parse_junctions(self):
+    def parse_junction_group(self):
         ret = dict()
 
-        for junction in self.root.iter('junction'):
-            new_junction = Junction(junction.get('name'), junction.get('id'))
+        for xjunction_group in self.root.iter('junctionGroup'):
 
-            for connection in junction.iter('connection'):
-                id = connection.get('id')
-                incoming_road = connection.get('incomingRoad')
-                connecting_road = connection.get('connectingRoad')
-                contact_point = connection.get('contactPoint')
-                new_connection = Connection(id, incoming_road, connecting_road, contact_point)
+            # Attributes
+            name = xjunction_group.get('name')
+            id = xjunction_group.get('id')
+            type = xjunction_group('type')
 
-                new_junction.connections.append(new_connection)
+            # Elements
+            junction_references = list()
+            for xjunction_reference in xjunction_group.iter('junctionReference'):
 
-            ret[new_junction.id] = new_junction
+                junction = xjunction_reference.get('junction')
+
+                new_junction_reference = JunctionReference(junction)
+                junction_references.append(new_junction_reference)
+
+            new_junction_group = JunctionGroup(name, id, type, junction_references)
+
+            ret[id] = new_junction_group
 
         return ret
 
