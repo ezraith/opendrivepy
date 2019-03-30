@@ -2,6 +2,7 @@ from __future__ import division, print_function, absolute_import
 
 
 from lxml import etree
+from opendrivepy.header import Header, GeoReference
 from opendrivepy.road import Road, RoadLink
 from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from opendrivepy.junction import Junction, Connection
@@ -14,6 +15,26 @@ class XMLParser(object):
     def __init__(self, file):
         self.xml = etree.parse(file)
         self.root = self.xml.getroot()
+
+    def parse_header(self):
+        xheader = self.root.find('header')
+        rev_major = xheader.get('revMajor')
+        rev_minor = xheader.get('revMinor')
+        name = xheader.get('name')
+        version = xheader.get('version')
+        date = xheader.get('date')
+        north = xheader.get('north')
+        south = xheader.get('south')
+        east = xheader.get('east')
+        west = xheader.get('west')
+        vendor = xheader.get('vendor')
+
+        # TODO Figure out how to read CTYPE data
+        geo_reference = GeoReference("")
+
+        return Header(rev_major, rev_minor, name, version, date, north, south, east, west, vendor, geo_reference)
+
+
 
     # Parses all roads in the xodr and instantiates them into objects
     # Returns a list of Road objects
@@ -73,6 +94,7 @@ class XMLParser(object):
             # Parse lanes for lane
             xlanes = road.find('lanes')
 
+            # TODO Adapt LaneSection for multiple lane records
             # Lane Sections
             xlane_section = xlanes.find('laneSection')
 

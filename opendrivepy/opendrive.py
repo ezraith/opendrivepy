@@ -8,7 +8,7 @@ import opendrivepy.xmlparser
 class OpenDrive(object):
     def __init__(self, file):
         parser = opendrivepy.xmlparser.XMLParser(file)
-        self.header = None
+        self.header = parser.parse_header()
         self.roads = parser.parse_roads()
         self.controllers = parser.parse_controllers()
         self.junctions = parser.parse_junctions()

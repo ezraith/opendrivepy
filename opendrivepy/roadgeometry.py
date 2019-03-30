@@ -139,6 +139,7 @@ class RoadSpiral(RoadGeometry):
             self.points.append(Point(x, y))
 
 
+# TODO Add implementation for Paramertric Polynomials
 class RoadParamPoly3(RoadGeometry):
     def __init__(self, s, x, y, hdg, length, aU, bU, cU, dU, aV, bV, cV, dV):
         super(RoadParamPoly3, self).__init__(s, x, y, hdg, length, 'y-')
