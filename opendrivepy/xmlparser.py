@@ -3,7 +3,7 @@ from __future__ import division, print_function, absolute_import
 
 from lxml import etree
 from opendrivepy.header import Header, GeoReference
-from opendrivepy.road import Road, RoadLink
+from opendrivepy.road import Road, RoadLink, RoadType, RoadSpeed
 from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from opendrivepy.junction import Junction, Connection
 from opendrivepy.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
@@ -91,6 +91,24 @@ class XMLParser(object):
                     curv_end = float(geometry[0].get('curvEnd'))
                     plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
+            # Parses RoadType and Road Speed
+            types = list()
+            for xtype in road.iter('type'):
+                s = xtype.get('s')
+                type = xtype.get('type')
+
+                speeds = list()
+
+                for xspeed in xtype.iter('speed'):
+                    max = xspeed.get('max')
+                    unit = xspeed.get('unit')
+
+                    new_speed = RoadSpeed(max, unit)
+                    speeds.append(new_speed)
+
+                new_type = RoadType(s, type, speeds)
+                types.append(new_type)
+
             # Parse lanes for lane
             xlanes = road.find('lanes')
 
@@ -123,7 +141,7 @@ class XMLParser(object):
 
             lanes = Lanes(lane_section)
 
-            new_road = Road(name, length, id, junction, predecessor, successor, plan_view, lanes)
+            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, lanes)
             ret[new_road.id] = new_road
 
         return ret
