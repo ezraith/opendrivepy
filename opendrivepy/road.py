@@ -4,7 +4,7 @@ from opendrivepy.point import EndPoint
 
 
 class Road(object):
-    def __init__(self, name, length, id, junction, predecessor, successor, type, plan_view, lanes):
+    def __init__(self, name, length, id, junction, predecessor, successor, type, plan_view, lanes, signals):
         self.name = name
         self.length = length
         self.id = id
@@ -16,6 +16,7 @@ class Road(object):
         self.elevation_profile = None
         self.lateral_profile = None
         self.lanes = lanes
+        self.signals = signals
 
         # Points that represent the road
         # Endpoints between records are duplicated atm

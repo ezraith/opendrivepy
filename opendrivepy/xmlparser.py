@@ -6,6 +6,7 @@ from opendrivepy.header import Header, GeoReference
 from opendrivepy.road import Road, RoadLink, RoadType, RoadSpeed
 from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from opendrivepy.junction import Junction, Connection
+from opendrivepy.signal import Signal, SignalDependency, LaneValidity
 from opendrivepy.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
 from opendrivepy.controller import Controller, Control
 from opendrivepy.junctiongroup import JunctionGroup, JunctionReference
@@ -33,8 +34,6 @@ class XMLParser(object):
         geo_reference = GeoReference("")
 
         return Header(rev_major, rev_minor, name, version, date, north, south, east, west, vendor, geo_reference)
-
-
 
     # Parses all roads in the xodr and instantiates them into objects
     # Returns a list of Road objects
@@ -109,6 +108,12 @@ class XMLParser(object):
                 new_type = RoadType(s, type, speeds)
                 types.append(new_type)
 
+
+            # Parses signals for signal
+            xsignals = road.find('signals')
+            signals = self.parse_signal(xsignals)
+
+
             # Parse lanes for lane
             xlanes = road.find('lanes')
 
@@ -141,10 +146,42 @@ class XMLParser(object):
 
             lanes = Lanes(lane_section)
 
-            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, lanes)
+            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, lanes, signals)
             ret[new_road.id] = new_road
 
         return ret
+
+    def parse_signal(self, xsignals):
+
+        signals = dict()
+
+        for xsignal in xsignals.iter('signal'):
+            s = xsignal.get('s')
+            t = xsignal.get('t')
+            id = xsignal.get('id')
+            name = xsignal.get('name')
+            dynamic = xsignal.get('dynamic')
+            orientation = xsignal.get('orientation')
+            z_offset = xsignal.get('zOffset')
+            country = xsignal.get('country')
+            type = xsignal.get('type')
+            subtype = xsignal.get('subtype')
+            value = xsignal.get('value')
+            unit = xsignal.get('unit')
+            height = xsignal.get('height')
+            width = xsignal.get('width')
+            text = xsignal.get('text')
+            h_offset = xsignal.get('hOffset')
+            pitch = xsignal.get('pitch')
+            roll = xsignal.get('roll')
+
+            new_signal = Signal(s, t, id, name, dynamic, orientation, z_offset, country, type, subtype,
+                                value, unit, height, width, text, h_offset, pitch, roll)
+
+            signals[id] = new_signal
+
+        return signals
+
 
     def parse_lane(self, xlane):
 
