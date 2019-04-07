@@ -2,32 +2,31 @@ from __future__ import division, print_function, absolute_import
 
 from opendrivepy.point import EndPoint
 
+
 class Road(object):
-    def __init__(self, name, length, id, junction):
+    def __init__(self, name, length, id, junction, predecessor, successor, type, plan_view, elevation_profile, lanes, signals):
         self.name = name
         self.length = length
         self.id = id
         self.junction = junction
-        self.predecessor = RoadLink
-        self.successor = RoadLink
-        self.types = list()
-        self.plan_view = list()
-        self.elevation_profile = None
-        self.lateral_profile = None  # Not implemented
-        self.lanes = None
-        self.signals = None
+        self.predecessor = predecessor
+        self.successor = successor
+        self.type = type
+        self.plan_view = plan_view
+        self.elevation_profile = elevation_profile
+        self.lateral_profile = None
+        self.lanes = lanes
+        self.signals = signals
 
         # Points that represent the road
         # Endpoints between records are duplicated atm
         self.points = list()
+        self.generate_points()
         self.segments = list()
+        self.generate_segments()
 
         self.start_point = EndPoint
         self.end_point = EndPoint
-
-    def update(self):
-        self.generate_points()
-        self.generate_segments()
         self.update_endpoints()
 
     def generate_points(self):
