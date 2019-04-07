@@ -5,6 +5,7 @@ from lxml import etree
 from opendrivepy.header import Header, GeoReference
 from opendrivepy.road import Road, RoadLink, RoadType, RoadSpeed
 from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
+from opendrivepy.elevation import Elevation, ElevationProfile
 from opendrivepy.junction import Junction, Connection
 from opendrivepy.signal import Signal, SignalDependency, LaneValidity
 from opendrivepy.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
@@ -90,6 +91,19 @@ class XMLParser(object):
                     curv_end = float(geometry[0].get('curvEnd'))
                     plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
+            # Parses ElevationProfile
+            xelevation_profile = road.find('elevationProfile')
+            elevation_profile = ElevationProfile()
+            if xelevation_profile is not None:
+                for xelevation in xelevation_profile.iter('elevation'):
+                    s = xelevation.get('s')
+                    a = xelevation.get('a')
+                    b = xelevation.get('b')
+                    c = xelevation.get('c')
+                    d = xelevation.get('d')
+                    new_elevation = Elevation(s, a, b, c, d)
+                    elevation_profile.elevations.append(new_elevation)
+
             # Parses RoadType and Road Speed
             types = list()
             for xtype in road.iter('type'):
@@ -108,11 +122,9 @@ class XMLParser(object):
                 new_type = RoadType(s, type, speeds)
                 types.append(new_type)
 
-
             # Parses signals for signal
             xsignals = road.find('signals')
             signals = self.parse_signal(xsignals)
-
 
             # Parse lanes for lane
             xlanes = road.find('lanes')
@@ -146,7 +158,7 @@ class XMLParser(object):
 
             lanes = Lanes(lane_section)
 
-            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, lanes, signals)
+            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, elevation_profile, lanes, signals)
             ret[new_road.id] = new_road
 
         return ret
@@ -181,7 +193,6 @@ class XMLParser(object):
             signals[id] = new_signal
 
         return signals
-
 
     def parse_lane(self, xlane):
 

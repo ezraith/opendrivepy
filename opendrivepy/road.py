@@ -4,7 +4,7 @@ from opendrivepy.point import EndPoint
 
 
 class Road(object):
-    def __init__(self, name, length, id, junction, predecessor, successor, type, plan_view, lanes, signals):
+    def __init__(self, name, length, id, junction, predecessor, successor, type, plan_view, elevation_profile, lanes, signals):
         self.name = name
         self.length = length
         self.id = id
@@ -13,7 +13,7 @@ class Road(object):
         self.successor = successor
         self.type = type
         self.plan_view = plan_view
-        self.elevation_profile = None
+        self.elevation_profile = elevation_profile
         self.lateral_profile = None
         self.lanes = lanes
         self.signals = signals
