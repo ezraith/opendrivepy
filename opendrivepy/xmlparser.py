@@ -48,30 +48,28 @@ class XMLParser(object):
             length = road.get('length')
             id = road.get('id')
             junction = road.get('junction')
+            new_road = Road(name, length, id, junction)
 
             # Parses link for predecessor and successors
             # No support for neighbor is implemented
             link = road.find('link')
-            predecessor = None
-            successor = None
             if link is not None:
                 xpredecessor = link.find('predecessor')
                 if xpredecessor is not None:
                     element_type = xpredecessor.get('elementType')
                     element_id = xpredecessor.get('elementId')
                     contact_point = xpredecessor.get('contactPoint')
-                    predecessor = (RoadLink(element_type, element_id, contact_point))
+                    new_road.predecessor = (RoadLink(element_type, element_id, contact_point))
 
                 xsuccessor = link.find('successor')
                 if xsuccessor is not None:
                     element_type = xsuccessor.get('elementType')
                     element_id = xsuccessor.get('elementId')
                     contact_point = xsuccessor.get('contactPoint')
-                    successor = (RoadLink(element_type, element_id, contact_point))
+                    new_road.successor = (RoadLink(element_type, element_id, contact_point))
 
             # Parses planView for geometry records
             xplan_view = road.find('planView')
-            plan_view = list()
             for geometry in xplan_view.iter('geometry'):
                 record = geometry[0].tag
 
@@ -82,19 +80,19 @@ class XMLParser(object):
                 length = float(geometry.get('length'))
 
                 if record == 'line':
-                    plan_view.append(RoadLine(s, x, y, hdg, length))
+                    new_road.plan_view.append(RoadLine(s, x, y, hdg, length))
                 elif record == 'arc':
                     curvature = float(geometry[0].get('curvature'))
-                    plan_view.append(RoadArc(s, x, y, hdg, length, curvature))
+                    new_road.plan_view.append(RoadArc(s, x, y, hdg, length, curvature))
                 elif record == 'spiral':
                     curv_start = float(geometry[0].get('curvStart'))
                     curv_end = float(geometry[0].get('curvEnd'))
-                    plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
+                    new_road.plan_view.append(RoadSpiral(s, x, y, hdg, length, curv_start, curv_end))
 
             # Parses ElevationProfile
             xelevation_profile = road.find('elevationProfile')
-            elevation_profile = ElevationProfile()
             if xelevation_profile is not None:
+                new_road.elevation_profile = ElevationProfile()
                 for xelevation in xelevation_profile.iter('elevation'):
                     s = xelevation.get('s')
                     a = xelevation.get('a')
@@ -102,10 +100,9 @@ class XMLParser(object):
                     c = xelevation.get('c')
                     d = xelevation.get('d')
                     new_elevation = Elevation(s, a, b, c, d)
-                    elevation_profile.elevations.append(new_elevation)
+                    new_road.elevation_profile.elevations.append(new_elevation)
 
             # Parses RoadType and Road Speed
-            types = list()
             for xtype in road.iter('type'):
                 s = xtype.get('s')
                 type = xtype.get('type')
@@ -120,7 +117,7 @@ class XMLParser(object):
                     speeds.append(new_speed)
 
                 new_type = RoadType(s, type, speeds)
-                types.append(new_type)
+                new_road.types.append(new_type)
 
             # Parses signals for signal
             xsignals = road.find('signals')
@@ -156,9 +153,8 @@ class XMLParser(object):
 
             lane_section = LaneSection(left, center, right)
 
-            lanes = Lanes(lane_section)
-
-            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, elevation_profile, lanes, signals)
+            new_road.lanes = Lanes(lane_section)
+            new_road.update()
             ret[new_road.id] = new_road
 
         return ret
