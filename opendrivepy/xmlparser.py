@@ -6,6 +6,7 @@ from opendrivepy.header import Header, GeoReference
 from opendrivepy.road import Road, RoadLink, RoadType, RoadSpeed
 from opendrivepy.roadgeometry import RoadLine, RoadSpiral, RoadArc
 from opendrivepy.elevation import Elevation, ElevationProfile
+from opendrivepy.lateral import LateralProfile, SuperElevation, CrossFall, Shape
 from opendrivepy.junction import Junction, Connection
 from opendrivepy.signal import Signal, SignalDependency, LaneValidity
 from opendrivepy.lane import Lanes, Lane, LaneLink, LaneSection, LaneWidth
@@ -93,8 +94,9 @@ class XMLParser(object):
 
             # Parses ElevationProfile
             xelevation_profile = road.find('elevationProfile')
-            elevation_profile = ElevationProfile()
+            elevation_profile = None
             if xelevation_profile is not None:
+                elevation_profile = ElevationProfile()
                 for xelevation in xelevation_profile.iter('elevation'):
                     s = xelevation.get('s')
                     a = xelevation.get('a')
@@ -103,6 +105,41 @@ class XMLParser(object):
                     d = xelevation.get('d')
                     new_elevation = Elevation(s, a, b, c, d)
                     elevation_profile.elevations.append(new_elevation)
+
+            # Parses LateralProfile
+            xlateral_profile = road.find('lateralProfile')
+            lateral_profile = None
+            if xlateral_profile is not None:
+                lateral_profile = LateralProfile()
+
+                for xsuperelevation in xlateral_profile.iter('superelevation'):
+                    s = xsuperelevation.get('s')
+                    a = xsuperelevation.get('a')
+                    b = xsuperelevation.get('b')
+                    c = xsuperelevation.get('c')
+                    d = xsuperelevation.get('d')
+                    new_superelevation = SuperElevation(s, a, b, c, d)
+                    lateral_profile.superelevations.append(new_superelevation)
+                    
+                for xcrossfall in xlateral_profile.iter('crossfall'):
+                    side = xcrossfall.get('side')
+                    s = xcrossfall.get('s')
+                    a = xcrossfall.get('a')
+                    b = xcrossfall.get('b')
+                    c = xcrossfall.get('c')
+                    d = xcrossfall.get('d')
+                    new_crossfall = CrossFall(side, s, a, b, c, d)
+                    lateral_profile.crossfalls.append(new_crossfall)
+
+                for xshape in xlateral_profile.iter('shape'):
+                    s = xshape.get('s')
+                    t = xshape.get('t')
+                    a = xshape.get('a')
+                    b = xshape.get('b')
+                    c = xshape.get('c')
+                    d = xshape.get('d')
+                    new_shape = CrossFall(s, t, a, b, c, d)
+                    lateral_profile.shapes.append(new_shape)
 
             # Parses RoadType and Road Speed
             types = list()
@@ -158,7 +195,7 @@ class XMLParser(object):
 
             lanes = Lanes(lane_section)
 
-            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, elevation_profile, lanes, signals)
+            new_road = Road(name, length, id, junction, predecessor, successor, types, plan_view, elevation_profile, lateral_profile, lanes, signals)
             ret[new_road.id] = new_road
 
         return ret
