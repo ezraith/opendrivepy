@@ -1,3 +1,3 @@
-# OpenDriveViewer
+# opendrivepy
 
 A python library for working with OpenDrive files (.xodr)
